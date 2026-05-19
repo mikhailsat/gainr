@@ -402,6 +402,15 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
 
       <div id="page-nutrition" class="page">
         <div class="section-header"><div class="section-title">Plan Nutritionnel</div></div>
+        <div class="day-tabs" id="nutri-day-tabs">
+          <div class="day-tab active" onclick="switchNutriDay(0,this)">Lundi</div>
+          <div class="day-tab" onclick="switchNutriDay(1,this)">Mardi</div>
+          <div class="day-tab" onclick="switchNutriDay(2,this)">Mercredi</div>
+          <div class="day-tab" onclick="switchNutriDay(3,this)">Jeudi</div>
+          <div class="day-tab" onclick="switchNutriDay(4,this)">Vendredi</div>
+          <div class="day-tab" onclick="switchNutriDay(5,this)">Samedi</div>
+          <div class="day-tab" onclick="switchNutriDay(6,this)">Dimanche</div>
+        </div>
         <div class="macro-overview">
           <div class="macro-top">
             <div><div class="macro-kcal">2850 <span>kcal/jour</span></div><div class="macro-surplus">↑ Surplus ~350 kcal · Prise de masse propre</div></div>
@@ -422,6 +431,7 @@ body{background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;font
             <div class="mbl-item"><div class="mbl-dot" style="background:#ffa502;"></div>Lipides 31%</div>
           </div>
         </div>
+        <div id="nutri-day-total" class="day-total" style="margin-bottom:14px;"></div>
         <div class="meals-grid" id="meals-grid"></div>
       </div>
 
@@ -718,6 +728,8 @@ function resetWeeks() {
   renderWeeks(); debouncedSave();
 }
 
+const WEEK_MEAL_PLAN = {"0": {"name": "Lundi", "meals": [{"emoji": "🌅", "name": "Petit-déjeuner", "time": "7h00", "kcal": 620, "p": 38, "g": 75, "l": 22, "items": ["80g flocons d'avoine + 250ml lait d'avoine", "3 œufs brouillés", "1 banane + 1 c. beurre de cacahuète", "Café noir"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "12h30", "kcal": 750, "p": 46, "g": 88, "l": 18, "items": ["200g blanc de poulet grillé", "200g riz basmati cuit", "Courgette + haricots verts sautés", "1 c.à.s huile d'olive"]}, {"emoji": "⚡", "name": "Pré-séance", "time": "15h30", "kcal": 420, "p": 22, "g": 68, "l": 5, "items": ["1 dose gainer + eau", "1 banane", "5g créatine"]}, {"emoji": "💪", "name": "Post-séance", "time": "18h30", "kcal": 350, "p": 32, "g": 38, "l": 5, "items": ["Whey 35g + eau", "2 tranches pain complet", "1 pomme"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h00", "kcal": 580, "p": 42, "g": 52, "l": 26, "items": ["200g saumon grillé", "150g patate douce rôtie", "Épinards sautés à l'ail", "15g huile d'olive"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 130, "p": 15, "g": 14, "l": 22, "items": ["4 œufs durs", "Sel, poivre"]}]}, "1": {"name": "Mardi", "meals": [{"emoji": "🌅", "name": "Petit-déjeuner", "time": "7h00", "kcal": 610, "p": 36, "g": 72, "l": 22, "items": ["80g flocons d'avoine + lait de riz 250ml", "2 œufs + 2 blancs d'œufs brouillés", "1 pomme + 1 c. beurre de cacahuète", "Thé vert"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "12h30", "kcal": 760, "p": 44, "g": 90, "l": 19, "items": ["200g dinde hachée poêlée", "200g pâtes complètes cuites", "Carottes + courgette", "1 c.à.s huile d'olive + herbes"]}, {"emoji": "⚡", "name": "Pré-séance", "time": "15h30", "kcal": 410, "p": 20, "g": 70, "l": 4, "items": ["1 dose gainer + eau", "30g dattes", "5g créatine"]}, {"emoji": "💪", "name": "Post-séance", "time": "18h30", "kcal": 340, "p": 30, "g": 40, "l": 5, "items": ["Whey 35g + eau", "1 orange", "1 tranche pain complet + houmous"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h00", "kcal": 590, "p": 40, "g": 55, "l": 25, "items": ["200g thon à l'eau égoutté", "150g lentilles vertes cuites", "Tomates + concombre", "Jus de citron + huile d'olive"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 140, "p": 14, "g": 16, "l": 22, "items": ["30g amandes", "1 kiwi"]}]}, "2": {"name": "Mercredi", "meals": [{"emoji": "🌅", "name": "Petit-déjeuner", "time": "7h00", "kcal": 630, "p": 40, "g": 74, "l": 21, "items": ["80g avoine + 250ml lait d'avoine", "3 œufs entiers + 1 blanc", "1 banane", "Café + 1 c. miel"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "12h30", "kcal": 740, "p": 45, "g": 86, "l": 19, "items": ["200g poulet mariné citron-ail", "200g riz complet", "Poivrons + oignons sautés", "Huile d'olive"]}, {"emoji": "⚡", "name": "Pré-séance", "time": "15h30", "kcal": 420, "p": 22, "g": 68, "l": 5, "items": ["1 dose gainer + lait d'avoine", "1 banane", "5g créatine"]}, {"emoji": "💪", "name": "Post-séance", "time": "18h30", "kcal": 350, "p": 33, "g": 37, "l": 5, "items": ["Whey 35g + eau", "2 tranches pain + confiture sans sucre", "1 poire"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h00", "kcal": 570, "p": 41, "g": 50, "l": 26, "items": ["200g merlu ou cabillaud", "150g pois chiches rôtis à l'ail", "Haricots verts vapeur", "Huile d'olive + citron"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 140, "p": 16, "g": 12, "l": 22, "items": ["4 œufs durs", "1 c. huile d'olive + sel"]}]}, "3": {"name": "Jeudi", "meals": [{"emoji": "🌅", "name": "Petit-déjeuner", "time": "7h00", "kcal": 620, "p": 37, "g": 76, "l": 20, "items": ["90g flocons d'avoine + 250ml lait de riz", "2 œufs brouillés", "1 pomme + 20g noix", "Café noir"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "12h30", "kcal": 755, "p": 47, "g": 87, "l": 18, "items": ["200g escalope de dinde grillée", "200g semoule de blé", "Épinards + tomates cerises", "Huile d'olive + cumin"]}, {"emoji": "⚡", "name": "Pré-séance", "time": "15h30", "kcal": 415, "p": 21, "g": 69, "l": 5, "items": ["1 dose gainer + eau", "1 banane + 10g raisins secs", "5g créatine"]}, {"emoji": "💪", "name": "Post-séance", "time": "18h30", "kcal": 345, "p": 31, "g": 39, "l": 5, "items": ["Whey 35g + eau", "1 pomme", "30g pain de mie complet"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h00", "kcal": 575, "p": 43, "g": 51, "l": 25, "items": ["200g sardines à l'huile égouttées", "150g lentilles corail", "Carottes râpées + citron", "Persil frais"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 140, "p": 14, "g": 15, "l": 22, "items": ["30g amandes + 10g noix de cajou", "1 banane"]}]}, "4": {"name": "Vendredi", "meals": [{"emoji": "🌅", "name": "Petit-déjeuner", "time": "7h00", "kcal": 625, "p": 39, "g": 73, "l": 22, "items": ["80g avoine + 250ml lait d'avoine", "3 œufs + omelette aux herbes", "1 orange", "Café noir"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "12h30", "kcal": 750, "p": 46, "g": 88, "l": 18, "items": ["200g poulet tikka (sans crème)", "200g riz basmati", "Haricots verts + courgette", "1 c.à.s huile coco"]}, {"emoji": "⚡", "name": "Pré-séance", "time": "15h30", "kcal": 420, "p": 22, "g": 68, "l": 5, "items": ["1 dose gainer + eau", "1 banane", "5g créatine"]}, {"emoji": "💪", "name": "Post-séance", "time": "18h30", "kcal": 350, "p": 32, "g": 38, "l": 5, "items": ["Whey 35g + eau", "2 tranches pain complet + beurre de cacahuète"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h00", "kcal": 580, "p": 42, "g": 52, "l": 26, "items": ["200g saumon au four citron-aneth", "150g patate douce vapeur", "Brocoli vapeur (si toléré)", "Huile d'olive"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 130, "p": 15, "g": 14, "l": 22, "items": ["4 œufs durs", "Sel + paprika"]}]}, "5": {"name": "Samedi", "meals": [{"emoji": "🌅", "name": "Petit-déjeuner", "time": "8h00", "kcal": 650, "p": 38, "g": 80, "l": 22, "items": ["100g flocons d'avoine + 300ml lait d'avoine", "2 œufs brouillés", "1 banane + 1 c. beurre de cacahuète", "1 c. miel + café"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "13h00", "kcal": 780, "p": 48, "g": 90, "l": 20, "items": ["250g poulet rôti (cuisse sans peau)", "220g riz complet", "Salade verte + tomates + concombre", "Vinaigrette huile d'olive + citron"]}, {"emoji": "⚡", "name": "Snack", "time": "16h00", "kcal": 380, "p": 18, "g": 60, "l": 10, "items": ["2 tranches pain complet + houmous", "1 pomme", "30g noix de cajou"]}, {"emoji": "💪", "name": "Collation", "time": "18h00", "kcal": 300, "p": 28, "g": 32, "l": 5, "items": ["Whey 30g + eau", "1 orange"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h00", "kcal": 610, "p": 44, "g": 55, "l": 26, "items": ["200g maquereaux en boîte", "150g pois chiches à la tomate", "Épinards sautés à l'ail", "Pain complet 1 tranche"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 130, "p": 15, "g": 14, "l": 22, "items": ["4 œufs durs", "1 kiwi"]}]}, "6": {"name": "Dimanche", "meals": [{"emoji": "🌅", "name": "Brunch", "time": "9h30", "kcal": 680, "p": 42, "g": 78, "l": 22, "items": ["100g avoine + 300ml lait d'avoine", "4 œufs brouillés", "2 tranches pain complet", "1 banane + café"]}, {"emoji": "🥗", "name": "Déjeuner", "time": "13h30", "kcal": 800, "p": 50, "g": 92, "l": 20, "items": ["250g dinde rôtie", "220g riz ou pommes de terre vapeur", "Légumes rôtis (courgette, poivron, carotte)", "Huile d'olive + herbes de Provence"]}, {"emoji": "⚡", "name": "Snack", "time": "16h30", "kcal": 360, "p": 16, "g": 58, "l": 10, "items": ["2 tranches pain + beurre de cacahuète", "1 pomme", "5g créatine"]}, {"emoji": "💪", "name": "Collation", "time": "18h30", "kcal": 290, "p": 26, "g": 30, "l": 5, "items": ["Whey 30g + eau", "1 banane"]}, {"emoji": "🍽️", "name": "Dîner", "time": "20h30", "kcal": 590, "p": 42, "g": 53, "l": 26, "items": ["200g thon frais ou en boîte", "150g lentilles vertes", "Salade composée (tomates, concombre, oignon)", "Huile d'olive + citron"]}, {"emoji": "🌙", "name": "Collation soir", "time": "22h00", "kcal": 130, "p": 15, "g": 14, "l": 22, "items": ["30g amandes", "1 kiwi"]}]}};
+
 const MEALS = [
   {emoji:'🌅',time:'7h00',name:'Petit-déjeuner',kcal:620,p:38,g:75,l:22,items:["80g flocons d'avoine + 250ml lait d'avoine","3 œufs entiers brouillés","1 banane + 1 c. beurre de cacahuète","Café ou thé"]},
   {emoji:'🥗',time:'12h30',name:'Déjeuner',kcal:750,p:46,g:88,l:18,items:["200g poulet ou dinde grillé","200g riz basmati ou pâtes complètes","Légumes : courgette, carotte, haricots verts","1 c. huile d'olive"]},
@@ -726,8 +738,27 @@ const MEALS = [
   {emoji:'🍽️',time:'20h00',name:'Dîner',kcal:580,p:42,g:52,l:26,items:["200g saumon, thon ou sardines","150g lentilles, pois chiches ou patate douce","Légumes variés selon tolérance","15g huile d'olive ou 30g amandes"]},
   {emoji:'🌙',time:'22h00',name:'Collation soir',kcal:130,p:15,g:14,l:22,items:["3–4 œufs durs OU 30g amandes","2 tranches pain + houmous","Optionnel — jours de séance"]},
 ];
+let currentNutriDay = 0;
+
+function switchNutriDay(idx, el) {
+  currentNutriDay = idx;
+  document.querySelectorAll('#nutri-day-tabs .day-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderMeals();
+}
+
 function renderMeals() {
-  document.getElementById('meals-grid').innerHTML = MEALS.map(m => `
+  const dayMeals = WEEK_MEAL_PLAN[currentNutriDay] ? WEEK_MEAL_PLAN[currentNutriDay].meals : MEALS;
+  let totalKcal=0, totalP=0, totalG=0, totalL=0;
+  dayMeals.forEach(m => { totalKcal+=m.kcal||0; totalP+=m.p||0; totalG+=m.g||0; totalL+=m.l||0; });
+  const tot = document.getElementById('nutri-day-total');
+  if (tot) tot.innerHTML = `
+    <div class=day-total-item><strong>${totalKcal}</strong>kcal total</div>
+    <div class=day-total-item><strong>${totalP}g</strong>Protéines</div>
+    <div class=day-total-item><strong>${totalG}g</strong>Glucides</div>
+    <div class=day-total-item><strong>${totalL}g</strong>Lipides</div>
+  `;
+  document.getElementById('meals-grid').innerHTML = dayMeals.map(m => `
     <div class="meal-card">
       <div class="meal-time-tag"><span class="meal-emoji">${m.emoji}</span><span class="meal-time">${m.time}</span><span class="meal-kcal-badge">${m.kcal} kcal</span></div>
       <div class="meal-name-main">${m.name}</div>
